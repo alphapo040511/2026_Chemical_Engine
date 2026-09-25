@@ -1,5 +1,7 @@
 using UnityEngine;
 
+
+[RequireComponent(typeof(ElementEmitter))]
 public class ChemicalObject : MonoBehaviour, IChemicalReceiver
 {
     [Header("재질 설정")]
@@ -36,14 +38,20 @@ public class ChemicalObject : MonoBehaviour, IChemicalReceiver
 
     private IChemicalReactionHandler[] receivers;
 
+    private ElementEmitter emitter;
+
     private void Awake()
     {
         receivers = GetComponents<IChemicalReactionHandler>();
+        emitter = GetComponent<ElementEmitter>();
     }
 
 #region Apply Element
 public void ApplyElement(ElementType element)
 {
+    if(emitter != null)
+        emitter.RemoveElement();
+
     switch(element)
     {
         case ElementType.Fire:
@@ -156,6 +164,7 @@ void OnElectric()
     }
 
     if(!canConductElectricity) return;  // 전기가 통할 수 있는가?
+    if(isConducting) return;
 
     isConducting = true;
     NotifyReaction(ChemicalReaction.ConductStarted);
@@ -166,7 +175,10 @@ void OnElectric()
 #region Remove Element
 public void RemoveElement(ElementType element)
 {
-  switch(element)
+    if(emitter != null)
+        emitter.RemoveElement();
+
+    switch(element)
     {
         case ElementType.Fire:
             RemoveFire();
@@ -229,6 +241,23 @@ void RemoveElectric()
 
 private void NotifyReaction(ChemicalReaction reaction)
 {
+    if(emitter != null)
+    {
+        if(reaction == ChemicalReaction.BurnStarted)
+            emitter.SetElement(ElementType.Fire);
+
+        if(reaction == ChemicalReaction.BurnEnded)
+            emitter.RemoveElement();
+
+        //전기는 일단 막기
+        //if(reaction == ChemicalReaction.ConductStarted)
+            //emitter.SetElement(ElementType.Electric);
+
+        if(reaction == ChemicalReaction.ConductEnded)
+            emitter.RemoveElement();
+    
+    }
+
     foreach (var receiver in receivers)
     {
         receiver.OnChemicalReaction(reaction);

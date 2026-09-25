@@ -25,6 +25,10 @@ public class TestCube : MonoBehaviour, IChemicalReactionHandler
     public float froozeTime = 3f;
     private float froozeEndTime;
 
+    [Header("전기 유지 시간")]
+    public float conductTime = 0.05f;
+    private float conductEndTime;
+
     void Awake()
     {
         chemicalObject = GetComponent<ChemicalObject>();
@@ -48,6 +52,11 @@ public class TestCube : MonoBehaviour, IChemicalReactionHandler
         if(chemicalObject.isFrozen && froozeEndTime <= Time.time)
         {
             chemicalObject.RemoveElement(ElementType.Ice);
+        }
+
+        if(chemicalObject.isConducting && conductEndTime <= Time.time)
+        {
+            chemicalObject.RemoveElement(ElementType.Electric);
         }
     }
 
@@ -78,7 +87,7 @@ public class TestCube : MonoBehaviour, IChemicalReactionHandler
                 break;
 
             case ChemicalReaction.ConductStarted:
-                if(electric != null) electric.SetActive(true);
+                ConductStarted();
                 break;
             case ChemicalReaction.ConductEnded:
                 if(electric != null) electric.SetActive(false);
@@ -108,5 +117,12 @@ public class TestCube : MonoBehaviour, IChemicalReactionHandler
         froozeEndTime = Time.time + froozeTime;
         
         if(ice != null) ice.SetActive(true);
+    }
+
+    void ConductStarted()
+    {
+        conductEndTime = Time.time + conductTime;
+        
+        if(electric != null) electric.SetActive(true);
     }
 }
