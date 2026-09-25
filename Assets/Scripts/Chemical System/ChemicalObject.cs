@@ -278,10 +278,6 @@ private void NotifyReaction(ChemicalReaction reaction)
 
             case ChemicalMaterialType.Custom:
             default:
-                canBurn = false;
-                canGetWet = false;
-                canFreeze = false;
-                canConductElectricity = false;
                 break;
         }
     }
